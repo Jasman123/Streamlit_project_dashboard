@@ -1,6 +1,5 @@
 import psycopg2
 from psycopg2 import OperationalError
-from sample_data_query import sample_data
 
 # =============================
 # SQL: Create Table
