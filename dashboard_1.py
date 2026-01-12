@@ -317,7 +317,6 @@ with tab1:
 
 with tab2:
     with st.container(height=container_height):
-        st.subheader(" 📈 Production Performance Matrix")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -355,8 +354,95 @@ with tab2:
                 scatter_plot(top5_NG, "station_name", "ng_quantity", "station_name","model_type", "🚨 Top 5 NG Line"),
                 use_container_width=True
             )
-            
+
         with col2:
+            st.markdown(
+            """
+            <h3 style="     
+                padding-left: 20px;
+                padding-top: 10px;
+                padding-bottom: 25px;
+                color: #2C3E50;
+                font-weight: 600;
+            ">
+                📊 Packing Stats
+            </h3>
+            """,    
+            unsafe_allow_html=True
+        )
+            
+            today = pd.Timestamp.today()
+            current_week = today.isocalendar().week
+            current_year = today.year
+
+            df['week'] = df['production_date'].dt.isocalendar().week
+            df['year'] = df['production_date'].dt.year  
+
+            weeks_available = ["All"] + sorted(df['week'].dropna().unique().tolist())
+            if current_week in weeks_available:
+                default_index = weeks_available.index(current_week)
+            else:
+                default_index = len(weeks_available) - 1
+            
+            selected_week = st.selectbox(
+                        "",
+                        options=weeks_available,
+                        index=default_index,
+                        key="week_select"
+                )
+            
+            filteredout_df = df[
+            (df['week'] == selected_week) &
+            (df['year'] == current_year)
+                 ].copy()
+            
+            station_df = filteredout_df[filteredout_df['station_name'] == 'Packing']
+            group_out = station_df.groupby('production_date', as_index=False)['ok_quantity'].sum()
+
+            target_daily = 2000
+
+            fig = px.bar(
+                        group_out,
+                        x="ok_quantity",
+                        y="production_date",
+                        orientation='h',
+                        text="ok_quantity",
+                        title=f"📦 Packing Output — Week {selected_week}",
+                        color="ok_quantity",
+                        color_continuous_scale=[
+                        (0, "black"),  
+                        (0.25, "red"),       
+                        (0.75, "yellow"), 
+                        (1, "green")     
+                                                ],
+                        range_color=[0, target_daily]
+                            
+                        )
+            fig.update_yaxes(
+                            tickformat="%Y-%m-%d"
+                             )
+
+            fig.add_vline(
+                x=target_daily,
+                line_dash="dash",
+                line_color="red",
+                line_width=2,
+                annotation_text=f"Target minimum = {target_daily}",
+                annotation_position="top right"
+            )
+
+            fig.update_traces(textposition="outside")
+            fig.update_layout(
+                title_x=0.5,
+                xaxis_title="Total OK Units",
+                yaxis_title="Date",
+                showlegend=False,
+                bargap=0.3
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+    
+
 
 
        
