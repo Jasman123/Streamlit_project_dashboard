@@ -305,14 +305,15 @@ pivot_1 = pivot_1.sort_values(by='station_name', key=lambda x: x.map({k: i for i
 
 tab1, tab2, tab3 = st.tabs(["📋 Production Records", " 📈 Production Performance Matrix", "🔄 Batch Analyze Flow "])
 
-container_height = 700
+container_height = 750
 
 with tab1:
     with st.container(height=container_height):
         st.dataframe(
             pivot_1,
             use_container_width=True,
-            hide_index=False
+            hide_index=True,
+            height=680,
         )
 
 with tab2:
