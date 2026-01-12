@@ -127,13 +127,26 @@ conn = create_connection(
     os.getenv("DB_HOST"),   
     os.getenv("DB_PORT")
 )
-drop_production_table(conn)
-create_production_table(conn)
+# drop_production_table(conn)
+# create_production_table(conn)
 
 
-if conn:
-    print("✅ Database connection established.")
+# if conn:
+#     print("✅ Database connection established.")
     
-    execute_query(conn, sample_data)
-    print("✅ Sample data inserted.")
+#     data = {
+#         "Station Name": "Test Station",
+#         "Model Type": "TX",
+#         "Batch Number": 123,
+#         "Tray Number": 1,
+#         "Product Line": "Test Line",
+#         "Supplier": "Test Supplier",
+#         "OK Quantity": 100,
+#         "NG Quantity": 5,
+#         "Operator Name": "Operator A",
+#         "Remarks": "Initial test record"
+#     }
+
+#     insert_production_record(conn, data)
+#     print("✅ Test record inserted.")
 
