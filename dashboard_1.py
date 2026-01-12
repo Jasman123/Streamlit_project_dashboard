@@ -158,14 +158,14 @@ def make_card(title, value, subtitle, color="#27AE60"):
 
 @st.cache_data(ttl=60)  # cache for 60 seconds
 def load_data():
-    if conn:
-        create_production_table(conn)
-        df = pd.read_sql(
-            "SELECT * FROM production_data;",
-            conn
-        )
-        return df
-    return pd.DataFrame()
+    # if conn:
+    #     create_production_table(conn)
+    #     df = pd.read_sql(
+    #         "SELECT * FROM production_data;",
+    #         conn
+    #     )
+    df = pd.read_csv("production_data_sample.csv")
+    return df
 
 
 df = load_data()
@@ -301,10 +301,14 @@ average_efficiency = (
     pivot_1['Line Efficiency (%)'].sum() /
     len(pivot_1) if len(pivot_1) > 0 else 0
 )
+pivot_1 = pivot_1.sort_values(by='station_name', key=lambda x: x.map({k: i for i, k in enumerate(CUSTOM_ORDER)}))
 
 tab1, tab2, tab3 = st.tabs(["📋 Production Records", " 📈 Production Performance Matrix", "🔄 Batch Analyze Flow "])
+
+container_height = 700
+
 with tab1:
-    with st.container(height=500):
+    with st.container(height=container_height):
         st.dataframe(
             pivot_1,
             use_container_width=True,
@@ -312,11 +316,52 @@ with tab1:
         )
 
 with tab2:
-    with st.container(height=500):
-        st.subheader("Under Development Feature")
+    with st.container(height=container_height):
+        st.subheader(" 📈 Production Performance Matrix")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(
+            """
+            <h3 style="
+                padding-left: 20px;
+                padding-top: 20px;
+                padding-bottom: 45px;
+                color: #2C3E50;
+                font-weight: 600;
+            ">
+                🧩 Select Batch
+            </h3>
+            """,
+            unsafe_allow_html=True
+        )
+            batchs_available_performance = ["All"] + filtered_df['batch_number'].unique().tolist()
+            selected_batch = st.selectbox(
+            "",
+            index = len(batchs_available) - 1,
+            options=batchs_available,
+            key="batch_select",
+            label_visibility="collapsed"
+        )
+            
+            df_NG = df.copy()
+
+            if selected_batch != "All":
+                df_NG = df_NG[df_NG["batch_number"] == selected_batch]
+
+            group_1 = df_NG.groupby(['model_type', 'station_name'], as_index=False)['ng_quantity'].sum()
+            top5_NG = group_1.nlargest(5, 'ng_quantity')
+            st.plotly_chart(
+                scatter_plot(top5_NG, "station_name", "ng_quantity", "station_name","model_type", "🚨 Top 5 NG Line"),
+                use_container_width=True
+            )
+            
+        with col2:
+
+
        
 with tab3:
-    with st.container(height=500):
+    with st.container(height=container_height):
         st.subheader("Under Development Feature")
         batchs_available_process = ["All"] + filtered_df['batch_number'].unique().tolist()
 
