@@ -450,29 +450,101 @@ with tab2:
        
 with tab3:
     with st.container(height=container_height):
-        st.subheader("Under Development Feature")
         batchs_available_process = ["All"] + filtered_df['batch_number'].unique().tolist()
 
-        col11, col12 = st.columns(2)
+        col_a1, col_a2 = st.columns([1,2])
 
-        with col11:
-            st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-            selected_batch_process = st.selectbox(
-                "",
-                index = len(batchs_available_process) - 1,
-                options=batchs_available_process,
-                key="batch_select_process",
-                label_visibility="collapsed"
-            )
+        with col_a1:
+            
+            col11, col12 = st.columns(2)
 
-        with col12:
-            st.markdown("<div style='padding-top: 10px;'></div>", unsafe_allow_html=True)
-            model_type = st.radio(
-                "",
-                options=["TX","RX"],
-                horizontal=True,
-                label_visibility="collapsed"
-            )
+            with col11:
+                st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+                selected_batch_process = st.selectbox(
+                    "",
+                    index = len(batchs_available_process) - 1,
+                    options=batchs_available_process,
+                    key="batch_select_process",
+                    label_visibility="collapsed"
+                )
+
+            with col12:
+                st.markdown("<div style='padding-top: 10px;'></div>", unsafe_allow_html=True)
+                model_type = st.radio(
+                    "",
+                    options=["TX","RX"],
+                    horizontal=True,
+                    label_visibility="collapsed"
+                )
+
+            batch_df = df.copy()
+
+            if selected_batch_process != "All":
+                batch_df = batch_df[batch_df["batch_number"] == selected_batch_process]
+
+            else:
+                batch_df = batch_df
+
+            batch_df = batch_df[batch_df['model_type'] == model_type]
+
+            pie_df = batch_df.melt(
+                    id_vars=["model_type"],
+                    value_vars=["ok_quantity", "ng_quantity"],
+                    var_name="Category",
+                    value_name="Value"
+                    )
+            pie_df = pie_df.groupby("Category", as_index=False)["Value"].sum()
+            pie_df["Category"] = pie_df["Category"].str.strip().str.upper()
+
+            fig = px.pie(
+                    pie_df,
+                    names="Category",
+                    values="Value",
+                    color="Category",
+                    color_discrete_map={"OK_QUANTITY": "#2E8B57", "NG_QUANTITY": "#D9534F"},
+                    hole=0.6
+                        )
+            fig.add_annotation(
+                    text=selected_batch_process,
+                    x=0.5, y=0.5,
+                    font=dict(size=30, color="#333", family="Arial Black"),
+                    showarrow=False
+                        )
+
+                # --- Display in Streamlit ---
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col_a2:
+            filtered_2_df = batch_df.copy()
+
+            filtered_2_df[["ok_quantity", "ng_quantity"]] = filtered_2_df[["ok_quantity", "ng_quantity"]].fillna(0)
+
+            df_group_1 = (
+                    filtered_2_df
+                    .groupby("station_name")[["ok_quantity", "ng_quantity"]]
+                    .sum()
+                    .reset_index() 
+                        )
+            df_melted = df_group_1.melt(id_vars="station_name", value_vars=["ok_quantity", "ng_quantity"], var_name="Status", value_name="Count")
+            # st.dataframe(df_group_1)
+
+            fig = px.bar(
+                        df_melted,
+                        x="station_name",
+                        y="Count",
+                        color="Status",
+                        text="Count",
+                        title="📊 Production Result by Station",
+                        color_discrete_map={
+                            "ok_quantity": "#2E8B57",   # sea green
+                            "ng_quantity": "#D9534F"    # soft red
+                            },
+                            category_orders={"station_name": CUSTOM_ORDER}
+                            )
+            fig.update_yaxes(range=[0, df_melted["Count"].max() * 1.4])
+            fig.update_layout(barmode="stack")
+            st.plotly_chart(fig, use_container_width=True)
+
         
        
         

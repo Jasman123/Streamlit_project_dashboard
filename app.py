@@ -1,9 +1,12 @@
 import streamlit as st
 
+
+
+
 pages = {
     "System Option": [
-        st.Page("dashboard_1.py", title="Dashboard"),
-        st.Page("app_input_data.py", title="Input your data")
+        st.Page("pages/dashboard.py", title="Production Overview"),
+        st.Page("pages/app_input_data.py", title="Input Production Data")
         
     ]
 }
