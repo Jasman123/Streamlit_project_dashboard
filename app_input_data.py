@@ -206,6 +206,7 @@ if submit:
         conn
         )
         st.success("✅ Record saved successfully!")
+        st.rerun()
     except Exception as e:
         st.error(f"❌ Error saving record: {e}")
 
@@ -266,6 +267,7 @@ with st.container(height=200, width=2000):
                 "SELECT * FROM production_data;",
                 conn
             )   
+            st.rerun()
         except Exception as e:
             st.error(f"❌ Error deleting record: {e}")
         
