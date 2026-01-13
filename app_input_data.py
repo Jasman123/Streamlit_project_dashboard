@@ -5,6 +5,7 @@ import plotly.express as px
 # from streamlit_autorefresh import st_autorefresh
 from datetime import date
 import os
+import time
 from database_connect import (
     create_connection,
     insert_production_record,
@@ -206,6 +207,7 @@ if submit:
         conn
         )
         st.success("✅ Record saved successfully!")
+        time.sleep(1)
         st.rerun()
     except Exception as e:
         st.error(f"❌ Error saving record: {e}")
