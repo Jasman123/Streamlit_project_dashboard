@@ -158,14 +158,15 @@ def make_card(title, value, subtitle, color="#27AE60"):
 
 @st.cache_data(ttl=60)  # cache for 60 seconds
 def load_data():
-    # if conn:
-    #     create_production_table(conn)
-    #     df = pd.read_sql(
-    #         "SELECT * FROM production_data;",
-    #         conn
-    #     )
-    df = pd.read_csv("production_data_sample.csv")
-    return df
+    if conn:
+        create_production_table(conn)
+        df = pd.read_sql(
+            "SELECT * FROM production_data;",
+            conn
+        )
+        return df
+    # df = pd.read_csv("production_data_sample.csv")
+    return pd.DataFrame
 
 
 df = load_data()
