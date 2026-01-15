@@ -203,7 +203,8 @@ if submit:
     try:
         insert_production_record(conn, new_record)
         record = pd.read_sql(
-        "SELECT * FROM production_data;",
+        """SELECT * FROM production_data;
+        """,
         conn
         )
         st.success("✅ Record saved successfully!")
@@ -211,12 +212,18 @@ if submit:
         st.rerun()
     except Exception as e:
         st.error(f"❌ Error saving record: {e}")
+        time.sleep(1)
+        st.rerun()
 
 
 with st.container(height=500):
+    # st.write(record.columns.tolist())
+    df_show = record[
+        pd.to_datetime(record['production_date']).dt.date == pd.Timestamp.today().date()
+    ]
     st.subheader("📋 Production Records")
     st.dataframe(
-        record,
+        df_show,
         use_container_width=True,
         hide_index=False
     )
